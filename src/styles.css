@@ -1,0 +1,836 @@
+/* ============================================================
+   Sistema Pequeno Restaurante - Demo
+   CSS puro, mobile first, sem bibliotecas.
+   ============================================================ */
+
+:root {
+  --cor-primaria: #b91c1c;
+  --cor-primaria-escura: #991b1b;
+  --cor-texto: #1f2937;
+  --cor-texto-suave: #6b7280;
+  --cor-fundo: #f3f4f6;
+  --cor-card: #ffffff;
+  --cor-borda: #e5e7eb;
+  --cor-borda-forte: #d1d5db;
+  --raio: 12px;
+  --sombra: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --sombra-forte: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-text-size-adjust: 100%;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ---------- Layout base ---------- */
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--cor-fundo);
+}
+
+.conteudo {
+  flex: 1;
+  padding: 16px;
+}
+
+.tela {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tela-titulo {
+  font-size: 1.4rem;
+}
+
+.tela-header-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Topbar ---------- */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--cor-primaria);
+  color: #fff;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+}
+
+.topbar-voltar {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.topbar-marca {
+  font-weight: 700;
+}
+
+.topbar-titulo {
+  margin-left: auto;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+/* ---------- Home ---------- */
+
+.home {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 12px;
+}
+
+.home-cabecalho {
+  text-align: center;
+}
+
+.home-cabecalho h1 {
+  font-size: 1.6rem;
+  color: var(--cor-primaria);
+}
+
+.home-subtitulo {
+  color: var(--cor-texto-suave);
+  margin: 8px 0 0;
+}
+
+.home-botoes {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.btn-grande {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 18px 20px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  border: 2px solid var(--cor-borda-forte);
+  border-radius: var(--raio);
+  background: var(--cor-card);
+  color: var(--cor-texto);
+  box-shadow: var(--sombra);
+  transition: transform 0.05s ease;
+}
+
+.btn-grande:active {
+  transform: scale(0.99);
+}
+
+.btn-icone {
+  font-size: 1.5rem;
+}
+
+.btn-primario {
+  background: var(--cor-primaria);
+  color: #fff;
+  border-color: var(--cor-primaria);
+}
+
+.btn-primario:active {
+  background: var(--cor-primaria-escura);
+}
+
+.btn-enviar {
+  justify-content: center;
+  position: sticky;
+  bottom: 12px;
+}
+
+.aviso-demo {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  padding: 12px 14px;
+  border-radius: var(--raio);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.rodape-app {
+  text-align: center;
+  color: var(--cor-texto-suave);
+  font-size: 0.8rem;
+  padding: 16px;
+}
+
+/* ---------- Categorias e produtos ---------- */
+
+.categoria {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.categoria-titulo {
+  font-size: 1.1rem;
+  color: var(--cor-primaria);
+  border-bottom: 2px solid var(--cor-borda);
+  padding-bottom: 6px;
+}
+
+.categoria-subtitulo {
+  font-weight: 700;
+  color: var(--cor-texto-suave);
+  margin: 10px 0 6px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.categoria-manual {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.produtos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.produto {
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--sombra);
+}
+
+.produto-nome {
+  font-weight: 700;
+}
+
+.produto-desc {
+  color: var(--cor-texto-suave);
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+.produto-preco {
+  color: var(--cor-primaria);
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.produto-controles {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ---------- Stepper ---------- */
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  border: 2px solid var(--cor-borda-forte);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.stepper button {
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: #f9fafb;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--cor-primaria);
+  line-height: 1;
+}
+
+.stepper button:disabled {
+  color: var(--cor-borda-forte);
+}
+
+.stepper-valor {
+  min-width: 44px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* ---------- Inputs / formularios ---------- */
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo > span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--cor-texto-suave);
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 12px;
+  border: 2px solid var(--cor-borda-forte);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--cor-texto);
+  width: 100%;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--cor-primaria);
+}
+
+textarea {
+  resize: vertical;
+}
+
+.input-obs {
+  font-size: 0.95rem;
+  padding: 10px;
+}
+
+/* ---------- Carrinho ---------- */
+
+.carrinho {
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 14px;
+  box-shadow: var(--sombra);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.carrinho-itens {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.carrinho-itens li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.95rem;
+}
+
+.carrinho-total {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 800;
+  font-size: 1.15rem;
+  border-top: 2px dashed var(--cor-borda);
+  padding-top: 10px;
+  color: var(--cor-primaria);
+}
+
+/* ---------- Mensagens ---------- */
+
+.erro {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+.nota-pequena {
+  color: var(--cor-texto-suave);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.vazio {
+  text-align: center;
+  color: var(--cor-texto-suave);
+  padding: 40px 16px;
+  background: var(--cor-card);
+  border: 1px dashed var(--cor-borda-forte);
+  border-radius: var(--raio);
+}
+
+/* ---------- Confirmacao ---------- */
+
+.confirmacao {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.confirmacao-check {
+  font-size: 3rem;
+}
+
+.bloco-whatsapp {
+  width: 100%;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: var(--raio);
+  padding: 14px;
+  text-align: left;
+}
+
+.bloco-whatsapp-titulo {
+  font-weight: 700;
+  color: #047857;
+  margin-bottom: 8px;
+}
+
+.whatsapp-preview {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+  font-size: 0.85rem;
+  background: #fff;
+  border: 1px solid #d1fae5;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 0 0 8px;
+}
+
+.confirmacao-comanda {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.acoes-empilhadas {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ---------- Cards de pedido (painel) ---------- */
+
+.lista-pedidos,
+.lista-cozinha {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-pedido,
+.card-cozinha {
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 14px;
+  box-shadow: var(--sombra);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-pedido-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-pedido-num {
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.card-pedido-meta {
+  color: var(--cor-texto-suave);
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+.card-pedido-total {
+  font-weight: 800;
+  color: var(--cor-primaria);
+  margin-top: 4px;
+}
+
+.campo-status {
+  margin: 0;
+}
+
+.card-pedido-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ---------- Botoes secundarios / perigo / pequenos ---------- */
+
+.btn-secundario {
+  flex: 1;
+  min-width: 90px;
+  padding: 12px;
+  border: 2px solid var(--cor-borda-forte);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--cor-texto);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.btn-secundario:active {
+  background: #f3f4f6;
+}
+
+.btn-pequeno {
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  border-radius: 10px;
+}
+
+.btn-primario.btn-pequeno {
+  border: 2px solid var(--cor-primaria);
+}
+
+.btn-perigo {
+  background: #fff;
+  color: var(--cor-primaria);
+  border: 2px solid var(--cor-primaria);
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* ---------- Status tags ---------- */
+
+.status-tag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-novo {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.status-em-preparo {
+  background: #fef3c7;
+  color: #b45309;
+}
+.status-pronto {
+  background: #dcfce7;
+  color: #15803d;
+}
+.status-saiu-para-entrega {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+.status-entregue {
+  background: #e5e7eb;
+  color: #374151;
+}
+.status-cancelado {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* ---------- Cozinha ---------- */
+
+.card-cozinha-meta {
+  color: var(--cor-texto-suave);
+  font-size: 0.85rem;
+}
+
+.card-cozinha-itens {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 1.05rem;
+}
+
+.card-cozinha-itens .qtd {
+  font-weight: 800;
+  color: var(--cor-primaria);
+}
+
+.item-obs-cozinha {
+  font-size: 0.9rem;
+  color: var(--cor-texto-suave);
+  padding-left: 18px;
+}
+
+.obs-geral-cozinha {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+}
+
+/* ---------- Modal ---------- */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 100;
+}
+
+.modal {
+  background: #fff;
+  border-radius: var(--raio);
+  box-shadow: var(--sombra-forte);
+  width: 100%;
+  max-width: 380px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--cor-borda);
+  font-weight: 700;
+}
+
+.modal-fechar {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--cor-texto-suave);
+}
+
+.modal-corpo {
+  overflow-y: auto;
+  padding: 16px;
+  background: #e5e7eb;
+  display: flex;
+  justify-content: center;
+}
+
+.modal-acoes {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.modal-acoes button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  border: 2px solid var(--cor-borda-forte);
+}
+
+.modal-acoes .btn-primario {
+  border-color: var(--cor-primaria);
+}
+
+/* ============================================================
+   Comanda (aparencia de bobina termica ~80mm)
+   ============================================================ */
+
+.comanda {
+  width: 300px;
+  background: #fff;
+  color: #000;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  line-height: 1.35;
+  padding: 14px 16px;
+  border: 1px solid var(--cor-borda-forte);
+}
+
+.comanda-cabecalho {
+  text-align: center;
+}
+
+.comanda-cabecalho strong {
+  font-size: 16px;
+}
+
+.comanda-sub {
+  font-size: 12px;
+}
+
+.comanda-linha-tracejada {
+  border-top: 1px dashed #000;
+  margin: 8px 0;
+}
+
+.comanda-pedido-num {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 4px 0;
+}
+
+.comanda-info div,
+.comanda-obs-geral div,
+.comanda-rodape-info > div {
+  word-break: break-word;
+}
+
+.comanda-item {
+  margin-bottom: 6px;
+}
+
+.comanda-item-linha {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.comanda-item-obs {
+  font-size: 12px;
+  padding-left: 8px;
+}
+
+.comanda-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.comanda-rodape {
+  text-align: center;
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+/* Area de impressao: escondida na tela, visivel apenas ao imprimir. */
+.area-impressao {
+  display: none;
+}
+
+/* ============================================================
+   Impressao
+   ============================================================ */
+
+@media print {
+  body {
+    background: #fff;
+  }
+
+  /* Esconde toda a interface e mostra apenas a comanda. */
+  .app,
+  .modal-overlay {
+    display: none !important;
+  }
+
+  .area-impressao {
+    display: block !important;
+  }
+
+  .area-impressao .comanda {
+    width: 80mm;
+    border: none;
+    padding: 0 2mm;
+    font-size: 12px;
+  }
+
+  @page {
+    size: 80mm auto;
+    margin: 4mm;
+  }
+}
+
+/* ---------- Telas maiores ---------- */
+
+@media (min-width: 640px) {
+  .produto {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .produto-info {
+    flex: 1;
+  }
+  .produto-controles {
+    align-items: flex-end;
+    min-width: 220px;
+  }
+  .input-obs {
+    width: 220px;
+  }
+}
