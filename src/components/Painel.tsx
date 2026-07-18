@@ -8,6 +8,7 @@ interface Props {
   aoAtualizar: () => void
   verComanda: (pedido: Pedido) => void
   imprimir: (pedido: Pedido) => void
+  carregarExemplos: () => void
 }
 
 // Classe CSS para colorir o status.
@@ -15,7 +16,13 @@ function classeStatus(status: StatusPedido): string {
   return 'status-tag status-' + status.toLowerCase().replace(/\s+/g, '-')
 }
 
-export default function Painel({ pedidos, aoAtualizar, verComanda, imprimir }: Props) {
+export default function Painel({
+  pedidos,
+  aoAtualizar,
+  verComanda,
+  imprimir,
+  carregarExemplos,
+}: Props) {
   // Ordem de chegada (mais antigo primeiro).
   const ordenados = [...pedidos].sort((a, b) => a.numero - b.numero)
 
@@ -43,6 +50,15 @@ export default function Painel({ pedidos, aoAtualizar, verComanda, imprimir }: P
             Limpar pedidos da demo
           </button>
         )}
+      </div>
+
+      <div className="modo-apresentacao-linha">
+        <span className="modo-apresentacao-texto">
+          Para apresentação, carregue pedidos de exemplo.
+        </span>
+        <button className="btn-apresentacao btn-pequeno" onClick={carregarExemplos}>
+          Carregar pedidos de exemplo
+        </button>
       </div>
 
       {ordenados.length === 0 ? (

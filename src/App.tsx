@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Pedido } from './types'
-import { lerPedidos } from './utils/storage'
+import { carregarPedidosExemplo, lerPedidos } from './utils/storage'
 import Home from './components/Home'
 import Cardapio from './components/Cardapio'
 import PedidoManual from './components/PedidoManual'
@@ -44,6 +44,12 @@ export default function App() {
     setPedidoImpressao(pedido)
   }, [])
 
+  // Modo apresentacao: carrega pedidos de exemplo (nao duplica) e recarrega.
+  const carregarExemplos = useCallback(() => {
+    carregarPedidosExemplo()
+    setPedidos(lerPedidos())
+  }, [])
+
   // Quando um pedido entra na area de impressao, dispara a impressao do navegador.
   useEffect(() => {
     if (pedidoImpressao) {
@@ -67,7 +73,9 @@ export default function App() {
         </header>
 
         <main className="conteudo">
-          {view === 'home' && <Home irPara={irPara} />}
+          {view === 'home' && (
+            <Home irPara={irPara} carregarExemplos={carregarExemplos} />
+          )}
           {view === 'cardapio' && <Cardapio aoCriarPedido={recarregar} />}
           {view === 'manual' && (
             <PedidoManual aoCriarPedido={recarregar} imprimir={imprimir} />
@@ -78,6 +86,7 @@ export default function App() {
               aoAtualizar={recarregar}
               verComanda={verComanda}
               imprimir={imprimir}
+              carregarExemplos={carregarExemplos}
             />
           )}
           {view === 'cozinha' && (
