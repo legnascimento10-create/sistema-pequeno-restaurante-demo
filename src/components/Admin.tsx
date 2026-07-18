@@ -1,11 +1,10 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { OrigemPedido, Pedido, StatusPedido } from '../types'
 import {
   formatarMoeda,
   formatarDataHora,
   formatarHora,
   tempoEntre,
-  ehMesmoDia,
 } from '../utils/format'
 
 interface Props {
@@ -28,6 +27,61 @@ const ORIGENS_RELATORIO: OrigemPedido[] = [
   'Balcão',
 ]
 
+// Periodos do filtro global.
+type Periodo =
+  | 'hoje'
+  | 'ontem'
+  | '7dias'
+  | '30dias'
+  | 'esteMes'
+  | 'mesPassado'
+  | 'todos'
+
+const PERIODOS: { chave: Periodo; rotulo: string }[] = [
+  { chave: 'hoje', rotulo: 'Hoje' },
+  { chave: 'ontem', rotulo: 'Ontem' },
+  { chave: '7dias', rotulo: 'Últimos 7 dias' },
+  { chave: '30dias', rotulo: 'Últimos 30 dias' },
+  { chave: 'esteMes', rotulo: 'Este mês' },
+  { chave: 'mesPassado', rotulo: 'Mês passado' },
+  { chave: 'todos', rotulo: 'Todos' },
+]
+
+// Calcula o intervalo [inicio, fim) em milissegundos para cada periodo.
+function intervaloPeriodo(periodo: Periodo): { inicio?: number; fim?: number } {
+  const agora = new Date()
+  const umDia = 24 * 60 * 60 * 1000
+  const inicioHoje = new Date(
+    agora.getFullYear(),
+    agora.getMonth(),
+    agora.getDate(),
+  ).getTime()
+
+  switch (periodo) {
+    case 'hoje':
+      return { inicio: inicioHoje, fim: inicioHoje + umDia }
+    case 'ontem':
+      return { inicio: inicioHoje - umDia, fim: inicioHoje }
+    case '7dias':
+      return { inicio: inicioHoje - 6 * umDia, fim: inicioHoje + umDia }
+    case '30dias':
+      return { inicio: inicioHoje - 29 * umDia, fim: inicioHoje + umDia }
+    case 'esteMes':
+      return {
+        inicio: new Date(agora.getFullYear(), agora.getMonth(), 1).getTime(),
+        fim: new Date(agora.getFullYear(), agora.getMonth() + 1, 1).getTime(),
+      }
+    case 'mesPassado':
+      return {
+        inicio: new Date(agora.getFullYear(), agora.getMonth() - 1, 1).getTime(),
+        fim: new Date(agora.getFullYear(), agora.getMonth(), 1).getTime(),
+      }
+    case 'todos':
+    default:
+      return {}
+  }
+}
+
 function classeStatus(status: StatusPedido): string {
   return 'status-tag status-' + status.toLowerCase().replace(/\s+/g, '-')
 }
@@ -38,22 +92,28 @@ function rotuloStatus(status: StatusPedido): string {
 }
 
 export default function Admin({ pedidos, verComanda }: Props) {
+  const [periodo, setPeriodo] = useState<Periodo>('todos')
+
   const dados = useMemo(() => {
-    const hoje = new Date()
-    const naoCancelados = pedidos.filter((p) => p.status !== 'Cancelado')
+    // Filtra pelos pedidos dentro do periodo escolhido (por hora de entrada).
+    const { inicio, fim } = intervaloPeriodo(periodo)
+    const filtrados = pedidos.filter((p) => {
+      const t = new Date(p.criadoEm).getTime()
+      if (inicio !== undefined && t < inicio) return false
+      if (fim !== undefined && t >= fim) return false
+      return true
+    })
 
-    const faturamentoHoje = pedidos
-      .filter((p) => p.status !== 'Cancelado' && ehMesmoDia(p.criadoEm, hoje))
-      .reduce((s, p) => s + p.total, 0)
+    const naoCancelados = filtrados.filter((p) => p.status !== 'Cancelado')
 
-    const faturamentoTotal = naoCancelados.reduce((s, p) => s + p.total, 0)
+    const faturamento = naoCancelados.reduce((s, p) => s + p.total, 0)
     const ticketMedio = naoCancelados.length
-      ? faturamentoTotal / naoCancelados.length
+      ? faturamento / naoCancelados.length
       : 0
 
-    const emAberto = pedidos.filter((p) => STATUS_ABERTO.includes(p.status)).length
-    const concluidos = pedidos.filter((p) => p.status === 'Entregue').length
-    const cancelados = pedidos.filter((p) => p.status === 'Cancelado').length
+    const emAberto = filtrados.filter((p) => STATUS_ABERTO.includes(p.status)).length
+    const concluidos = filtrados.filter((p) => p.status === 'Entregue').length
+    const cancelados = filtrados.filter((p) => p.status === 'Cancelado').length
 
     // Financeiro por forma de pagamento (somente nao cancelados).
     const pagamentos = { dinheiro: 0, pix: 0, cartao: 0, naEntrega: 0, outros: 0 }
@@ -81,21 +141,21 @@ export default function Admin({ pedidos, verComanda }: Props) {
     }
     const produtos = [...mapaProdutos.values()].sort((a, b) => b.qtd - a.qtd)
 
-    // Pedidos por origem (todos os pedidos).
+    // Pedidos por origem (todos os pedidos do periodo).
     const porOrigem = ORIGENS_RELATORIO.map((o) => ({
       origem: o,
-      qtd: pedidos.filter((p) => p.origem === o).length,
+      qtd: filtrados.filter((p) => p.origem === o).length,
     }))
 
     // Historico: mais recentes primeiro.
-    const historico = [...pedidos].sort((a, b) => b.numero - a.numero)
+    const historico = [...filtrados].sort((a, b) => b.numero - a.numero)
 
     // Clientes (agrupados por telefone, senao por nome).
     const mapaClientes = new Map<
       string,
       { nome: string; telefone: string; qtd: number; total: number; ultimo: string }
     >()
-    for (const p of pedidos) {
+    for (const p of filtrados) {
       const chave = (p.telefone || p.clienteNome || 'sem-nome').trim().toLowerCase()
       const atual = mapaClientes.get(chave) ?? {
         nome: p.clienteNome || 'Sem nome',
@@ -114,20 +174,38 @@ export default function Admin({ pedidos, verComanda }: Props) {
     const clientes = [...mapaClientes.values()].sort((a, b) => b.qtd - a.qtd)
 
     return {
-      faturamentoHoje,
-      totalPedidos: pedidos.length,
+      faturamento,
+      totalPedidos: filtrados.length,
       ticketMedio,
       emAberto,
       concluidos,
       cancelados,
       pagamentos,
-      faturamentoTotal,
       produtos,
       porOrigem,
       historico,
       clientes,
     }
-  }, [pedidos])
+  }, [pedidos, periodo])
+
+  const filtro = (
+    <div className="admin-filtro">
+      <span className="admin-filtro-texto">
+        Escolha o período para atualizar os números e relatórios.
+      </span>
+      <div className="admin-filtro-botoes">
+        {PERIODOS.map((p) => (
+          <button
+            key={p.chave}
+            className={'chip-periodo' + (periodo === p.chave ? ' ativo' : '')}
+            onClick={() => setPeriodo(p.chave)}
+          >
+            {p.rotulo}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
 
   if (pedidos.length === 0) {
     return (
@@ -153,11 +231,13 @@ export default function Admin({ pedidos, verComanda }: Props) {
         neste navegador.
       </p>
 
+      {filtro}
+
       {/* Cards de resumo */}
       <div className="admin-cards">
         <div className="admin-card destaque">
-          <div className="admin-card-rotulo">Faturamento de hoje</div>
-          <div className="admin-card-valor">{formatarMoeda(dados.faturamentoHoje)}</div>
+          <div className="admin-card-rotulo">Faturamento do período</div>
+          <div className="admin-card-valor">{formatarMoeda(dados.faturamento)}</div>
         </div>
         <div className="admin-card">
           <div className="admin-card-rotulo">Total de pedidos</div>
@@ -211,7 +291,7 @@ export default function Admin({ pedidos, verComanda }: Props) {
             )}
             <li className="admin-lista-total">
               <span>Total geral</span>
-              <span>{formatarMoeda(dados.faturamentoTotal)}</span>
+              <span>{formatarMoeda(dados.faturamento)}</span>
             </li>
           </ul>
         </section>
@@ -220,7 +300,7 @@ export default function Admin({ pedidos, verComanda }: Props) {
         <section className="admin-bloco">
           <h3 className="admin-bloco-titulo">Produtos mais vendidos</h3>
           {dados.produtos.length === 0 ? (
-            <p className="nota-pequena">Sem vendas registradas.</p>
+            <p className="nota-pequena">Sem vendas no período.</p>
           ) : (
             <ul className="admin-lista">
               {dados.produtos.map((prod) => (
@@ -251,83 +331,88 @@ export default function Admin({ pedidos, verComanda }: Props) {
         {/* Clientes */}
         <section className="admin-bloco">
           <h3 className="admin-bloco-titulo">Clientes</h3>
-          <div className="admin-tabela-scroll">
-            <table className="admin-tabela">
-              <thead>
-                <tr>
-                  <th>Cliente</th>
-                  <th>Telefone</th>
-                  <th>Pedidos</th>
-                  <th>Total gasto</th>
-                  <th>Último pedido</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dados.clientes.map((c, i) => (
-                  <tr key={i}>
-                    <td>{c.nome}</td>
-                    <td>{c.telefone || '-'}</td>
-                    <td>{c.qtd}</td>
-                    <td>{formatarMoeda(c.total)}</td>
-                    <td>{formatarDataHora(c.ultimo)}</td>
+          {dados.clientes.length === 0 ? (
+            <p className="nota-pequena">Nenhum cliente no período.</p>
+          ) : (
+            <div className="admin-tabela-scroll">
+              <table className="admin-tabela">
+                <thead>
+                  <tr>
+                    <th>Cliente</th>
+                    <th>Telefone</th>
+                    <th>Pedidos</th>
+                    <th>Total gasto</th>
+                    <th>Último pedido</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {dados.clientes.map((c, i) => (
+                    <tr key={i}>
+                      <td>{c.nome}</td>
+                      <td>{c.telefone || '-'}</td>
+                      <td>{c.qtd}</td>
+                      <td>{formatarMoeda(c.total)}</td>
+                      <td>{formatarDataHora(c.ultimo)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
       </div>
 
       {/* Historico completo */}
       <section className="admin-bloco admin-bloco-largo">
         <h3 className="admin-bloco-titulo">Histórico de pedidos</h3>
-        <div className="admin-tabela-scroll">
-          <table className="admin-tabela">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Cliente</th>
-                <th>Telefone</th>
-                <th>Origem</th>
-                <th>Pagamento</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>Entrada</th>
-                <th>Conclusão</th>
-                <th>Tempo total</th>
-                <th>Comanda</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dados.historico.map((p) => (
-                <tr key={p.id}>
-                  <td>#{p.numero}</td>
-                  <td>{p.clienteNome || '-'}</td>
-                  <td>{p.telefone || '-'}</td>
-                  <td>{p.origem}</td>
-                  <td>{p.formaPagamento}</td>
-                  <td>{formatarMoeda(p.total)}</td>
-                  <td>
-                    <span className={classeStatus(p.status)}>
-                      {rotuloStatus(p.status)}
-                    </span>
-                  </td>
-                  <td>{formatarHora(p.criadoEm)}</td>
-                  <td>{p.completedAt ? formatarHora(p.completedAt) : '-'}</td>
-                  <td>{tempoEntre(p.criadoEm, p.completedAt)}</td>
-                  <td>
-                    <button
-                      className="btn-link"
-                      onClick={() => verComanda(p)}
-                    >
-                      Ver comanda
-                    </button>
-                  </td>
+        {dados.historico.length === 0 ? (
+          <p className="nota-pequena">Nenhum pedido no período.</p>
+        ) : (
+          <div className="admin-tabela-scroll">
+            <table className="admin-tabela">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Cliente</th>
+                  <th>Telefone</th>
+                  <th>Origem</th>
+                  <th>Pagamento</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Entrada</th>
+                  <th>Conclusão</th>
+                  <th>Tempo total</th>
+                  <th>Comanda</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {dados.historico.map((p) => (
+                  <tr key={p.id}>
+                    <td>#{p.numero}</td>
+                    <td>{p.clienteNome || '-'}</td>
+                    <td>{p.telefone || '-'}</td>
+                    <td>{p.origem}</td>
+                    <td>{p.formaPagamento}</td>
+                    <td>{formatarMoeda(p.total)}</td>
+                    <td>
+                      <span className={classeStatus(p.status)}>
+                        {rotuloStatus(p.status)}
+                      </span>
+                    </td>
+                    <td>{formatarHora(p.criadoEm)}</td>
+                    <td>{p.completedAt ? formatarHora(p.completedAt) : '-'}</td>
+                    <td>{tempoEntre(p.criadoEm, p.completedAt)}</td>
+                    <td>
+                      <button className="btn-link" onClick={() => verComanda(p)}>
+                        Ver comanda
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     </div>
   )

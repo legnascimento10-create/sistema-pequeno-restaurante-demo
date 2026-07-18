@@ -818,12 +818,16 @@ textarea {
 
 /* ---------- Cozinha ---------- */
 
-/* Mural de comandas: cartoes com cara de papel "pendurado" */
+/* Mural de comandas: cartoes com cara de papel "pendurado".
+   Estrutura cabecalho/corpo/rodape para manter os botoes alinhados. */
 .mural-comandas .card-cozinha {
   background: #fffdf5;
-  border: 1px solid #e7e1c8;
-  border-top: 4px solid var(--cor-primaria);
+  border: 2px solid #e7e1c8;
   position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .mural-comandas .card-cozinha::before {
@@ -833,6 +837,58 @@ textarea {
   left: 50%;
   transform: translateX(-50%);
   font-size: 1.1rem;
+}
+
+.card-cozinha-cabecalho {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Corpo cresce para empurrar o rodape para baixo */
+.card-cozinha-corpo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Area reservada para observacao geral: nao empurra os botoes de forma baguncada */
+.obs-geral-area {
+  min-height: 8px;
+}
+
+/* Rodape fixo na base: botoes sempre alinhados entre os cards */
+.card-cozinha-rodape {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.espera-tempo {
+  display: inline-block;
+  margin-left: 8px;
+  font-weight: 700;
+  color: var(--cor-texto);
+}
+
+/* Contorno conforme o tempo de espera */
+.mural-comandas .card-cozinha.espera-ok {
+  border-color: #86efac;
+  border-top: 5px solid #22c55e;
+}
+.mural-comandas .card-cozinha.espera-media {
+  border-color: #fde047;
+  border-top: 5px solid #eab308;
+}
+.mural-comandas .card-cozinha.espera-alta {
+  border-color: #fdba74;
+  border-top: 5px solid #f97316;
+}
+.mural-comandas .card-cozinha.espera-critica {
+  border-color: #fca5a5;
+  border-top: 5px solid #ef4444;
 }
 
 .card-cozinha-meta {
@@ -869,11 +925,34 @@ textarea {
   font-size: 0.9rem;
 }
 
-/* Botao principal de avanco do preparo na cozinha */
+/* Botao principal de avanco do preparo na cozinha.
+   Cada etapa tem uma cor propria e intuitiva. */
 .btn-avanco {
   justify-content: center;
   font-size: 1.1rem;
   padding: 16px;
+  color: #fff;
+  border: 2px solid transparent;
+}
+
+.btn-avanco:active {
+  transform: scale(0.99);
+}
+
+/* Comecar preparo -> azul (atencao inicial) */
+.btn-etapa-iniciar {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+/* Marcar como pronto -> laranja (intermediario) */
+.btn-etapa-pronto {
+  background: #f97316;
+  border-color: #f97316;
+}
+/* Concluir pedido -> verde */
+.btn-etapa-concluir {
+  background: #16a34a;
+  border-color: #16a34a;
 }
 
 .acoes-secundarias .btn-secundario {
@@ -902,6 +981,44 @@ textarea {
   font-size: 0.85rem;
   color: var(--cor-texto-suave);
   margin: 0;
+}
+
+/* Filtro global de periodo */
+.admin-filtro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-filtro-texto {
+  font-size: 0.85rem;
+  color: var(--cor-texto-suave);
+}
+
+.admin-filtro-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip-periodo {
+  padding: 8px 14px;
+  border: 2px solid var(--cor-borda-forte);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--cor-texto);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.chip-periodo:active {
+  transform: scale(0.98);
+}
+
+.chip-periodo.ativo {
+  background: var(--cor-primaria);
+  border-color: var(--cor-primaria);
+  color: #fff;
 }
 
 .admin-cards {
