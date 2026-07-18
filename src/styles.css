@@ -59,6 +59,11 @@ button {
   background: var(--cor-fundo);
 }
 
+/* Telas que aproveitam mais a largura (Cozinha e Painel do Dono). */
+.app-largo {
+  max-width: 1100px;
+}
+
 .conteudo {
   flex: 1;
   padding: 16px;
@@ -212,6 +217,34 @@ button {
   color: var(--cor-texto-suave);
   font-size: 0.8rem;
   padding: 16px;
+}
+
+/* ---------- Home: secao do dono (separada da operacao) ---------- */
+
+.home-secao-dono {
+  border-top: 1px dashed var(--cor-borda-forte);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.home-secao-rotulo {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cor-texto-suave);
+}
+
+.btn-dono {
+  background: #1f2937;
+  color: #fff;
+  border-color: #1f2937;
+}
+
+.btn-dono:active {
+  background: #111827;
 }
 
 /* ---------- Modo apresentacao (pedidos de exemplo) ---------- */
@@ -834,6 +867,173 @@ textarea {
   border-radius: 8px;
   padding: 8px 10px;
   font-size: 0.9rem;
+}
+
+/* Botao principal de avanco do preparo na cozinha */
+.btn-avanco {
+  justify-content: center;
+  font-size: 1.1rem;
+  padding: 16px;
+}
+
+.acoes-secundarias .btn-secundario {
+  font-size: 0.9rem;
+  padding: 10px;
+}
+
+/* Grid de comandas no desktop */
+@media (min-width: 720px) {
+  .mural-comandas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+}
+
+/* ============================================================
+   Painel do Dono (Admin)
+   ============================================================ */
+
+.admin-nota {
+  background: #f9fafb;
+  border: 1px solid var(--cor-borda);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  color: var(--cor-texto-suave);
+  margin: 0;
+}
+
+.admin-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.admin-card {
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 14px;
+  box-shadow: var(--sombra);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-card.destaque {
+  border-color: var(--cor-primaria);
+  background: #fef2f2;
+}
+
+.admin-card-rotulo {
+  font-size: 0.8rem;
+  color: var(--cor-texto-suave);
+  font-weight: 600;
+}
+
+.admin-card-valor {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--cor-texto);
+}
+
+.admin-card.destaque .admin-card-valor {
+  color: var(--cor-primaria);
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.admin-bloco {
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 16px;
+  box-shadow: var(--sombra);
+}
+
+.admin-bloco-titulo {
+  font-size: 1.05rem;
+  color: var(--cor-primaria);
+  border-bottom: 2px solid var(--cor-borda);
+  padding-bottom: 6px;
+  margin-bottom: 12px;
+}
+
+.admin-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-lista li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.95rem;
+}
+
+.admin-lista-total {
+  border-top: 2px dashed var(--cor-borda);
+  padding-top: 8px;
+  font-weight: 800;
+  color: var(--cor-primaria);
+}
+
+/* Tabelas do admin com rolagem horizontal no celular */
+.admin-tabela-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.admin-tabela th,
+.admin-tabela td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.admin-tabela th {
+  color: var(--cor-texto-suave);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--cor-primaria);
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0;
+  text-decoration: underline;
+}
+
+@media (min-width: 720px) {
+  .admin-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .admin-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .admin-bloco-largo {
+    grid-column: 1 / -1;
+  }
 }
 
 /* ---------- Modal ---------- */

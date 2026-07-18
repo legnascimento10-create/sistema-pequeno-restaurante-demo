@@ -59,7 +59,11 @@ export interface Pedido {
   observacaoGeral: string
   total: number
   status: StatusPedido
-  criadoEm: string // ISO string
+  criadoEm: string // ISO string - hora de entrada do pedido
+  // Horarios de andamento (opcionais; pedidos antigos podem nao ter).
+  startedAt?: string // entrou em preparo
+  readyAt?: string // ficou pronto
+  completedAt?: string // concluido (entregue)
 }
 
 export const STATUS_LISTA: StatusPedido[] = [

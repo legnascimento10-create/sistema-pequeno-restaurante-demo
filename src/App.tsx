@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { Pedido } from './types'
-import { carregarPedidosExemplo, lerPedidos } from './utils/storage'
+import type { Pedido, StatusPedido } from './types'
+import { atualizarStatus, carregarPedidosExemplo, lerPedidos } from './utils/storage'
 import Home from './components/Home'
 import Cardapio from './components/Cardapio'
 import PedidoManual from './components/PedidoManual'
 import Painel from './components/Painel'
 import Cozinha from './components/Cozinha'
+import Admin from './components/Admin'
 import Comanda from './components/Comanda'
 
-export type View = 'home' | 'cardapio' | 'manual' | 'painel' | 'cozinha'
+export type View = 'home' | 'cardapio' | 'manual' | 'painel' | 'cozinha' | 'admin'
 
 const TITULOS: Record<View, string> = {
   home: 'Início',
@@ -16,7 +17,11 @@ const TITULOS: Record<View, string> = {
   manual: 'Novo Pedido',
   painel: 'Pedidos em andamento',
   cozinha: 'Cozinha',
+  admin: 'Painel do Dono',
 }
+
+// Telas que aproveitam mais a largura no desktop.
+const VIEWS_LARGAS: View[] = ['cozinha', 'admin']
 
 export default function App() {
   const [view, setView] = useState<View>('home')
@@ -50,6 +55,12 @@ export default function App() {
     setPedidos(lerPedidos())
   }, [])
 
+  // Muda o status de um pedido (usado pela Cozinha) e recarrega a lista.
+  const mudarStatus = useCallback((id: string, status: StatusPedido) => {
+    atualizarStatus(id, status)
+    setPedidos(lerPedidos())
+  }, [])
+
   // Quando um pedido entra na area de impressao, dispara a impressao do navegador.
   useEffect(() => {
     if (pedidoImpressao) {
@@ -58,9 +69,11 @@ export default function App() {
     }
   }, [pedidoImpressao])
 
+  const largura = VIEWS_LARGAS.includes(view) ? ' app-largo' : ''
+
   return (
     <>
-      <div className="app">
+      <div className={'app' + largura}>
         <header className="topbar">
           {view !== 'home' ? (
             <button className="topbar-voltar" onClick={() => irPara('home')}>
@@ -90,7 +103,15 @@ export default function App() {
             />
           )}
           {view === 'cozinha' && (
-            <Cozinha pedidos={pedidos} verComanda={verComanda} imprimir={imprimir} />
+            <Cozinha
+              pedidos={pedidos}
+              verComanda={verComanda}
+              imprimir={imprimir}
+              mudarStatus={mudarStatus}
+            />
+          )}
+          {view === 'admin' && (
+            <Admin pedidos={pedidos} verComanda={verComanda} />
           )}
         </main>
 

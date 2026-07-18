@@ -60,10 +60,17 @@ export function criarPedido(
 export function atualizarStatus(id: string, status: StatusPedido): void {
   const pedidos = lerPedidos()
   const pedido = pedidos.find((p) => p.id === id)
-  if (pedido) {
-    pedido.status = status
-    salvarPedidos(pedidos)
-  }
+  if (!pedido) return
+
+  pedido.status = status
+
+  // Registra os horarios de andamento (so na primeira vez de cada etapa).
+  const agora = new Date().toISOString()
+  if (status === 'Em preparo' && !pedido.startedAt) pedido.startedAt = agora
+  if (status === 'Pronto' && !pedido.readyAt) pedido.readyAt = agora
+  if (status === 'Entregue' && !pedido.completedAt) pedido.completedAt = agora
+
+  salvarPedidos(pedidos)
 }
 
 export function buscarPedido(id: string): Pedido | undefined {
@@ -77,70 +84,160 @@ export function limparPedidos(): void {
 
 // --- Modo apresentacao: pedidos de exemplo --------------------------------
 
-// Ids fixos garantem que os pedidos de exemplo nao dupliquem se o botao
-// for clicado varias vezes.
-const IDS_EXEMPLO = ['exemplo-cardapio', 'exemplo-telefone', 'exemplo-whatsapp']
-
 function somaItens(itens: ItemPedido[]): number {
   return itens.reduce((s, i) => s + i.preco * i.quantidade, 0)
 }
 
-// Modelos dos pedidos de exemplo (sem numero/criadoEm, definidos ao carregar).
-type ModeloExemplo = Omit<Pedido, 'numero' | 'criadoEm'>
+const MIN = 60 * 1000
+
+// Modelo de exemplo: alem dos dados do pedido, guarda deslocamentos de tempo
+// (em minutos atras) para gerar horarios realistas de entrada/preparo/pronto/
+// conclusao. Assim o Painel do Dono mostra dados uteis sem precisar operar.
+interface ModeloExemplo {
+  id: string
+  origem: Pedido['origem']
+  clienteNome: string
+  telefone: string
+  endereco: string
+  formaPagamento: Pedido['formaPagamento']
+  itens: ItemPedido[]
+  observacaoGeral: string
+  status: StatusPedido
+  minEntrada: number // minutos atras em que entrou
+  minInicio?: number // minutos atras em que comecou o preparo
+  minPronto?: number // minutos atras em que ficou pronto
+  minConcluido?: number // minutos atras em que foi concluido
+}
 
 function modelosExemplo(): ModeloExemplo[] {
-  const cardapioItens: ItemPedido[] = [
-    { produtoId: 'yakisoba-especial', nome: 'Yakisoba especial', preco: 39.9, quantidade: 1, observacao: 'sem cebola' },
-    { produtoId: 'refrigerante-lata', nome: 'Refrigerante lata', preco: 6.5, quantidade: 2, observacao: '' },
-  ]
-  const telefoneItens: ItemPedido[] = [
-    { produtoId: 'frango-xadrez', nome: 'Frango xadrez', preco: 34.9, quantidade: 1, observacao: 'bem passado' },
-    { produtoId: 'rolinho-primavera', nome: 'Rolinho primavera', preco: 18.9, quantidade: 1, observacao: '' },
-  ]
-  const whatsappItens: ItemPedido[] = [
-    { produtoId: 'temaki-salmao', nome: 'Temaki salmão', preco: 28.9, quantidade: 2, observacao: 'pouco wasabi' },
-    { produtoId: 'suco-natural', nome: 'Suco natural', preco: 9.9, quantidade: 1, observacao: 'laranja' },
-    { produtoId: 'harumaki-doce', nome: 'Harumaki doce', preco: 16.9, quantidade: 1, observacao: '' },
-  ]
-
   return [
     {
-      id: 'exemplo-cardapio',
+      id: 'exemplo-1',
       origem: 'Cardápio',
       clienteNome: 'Ana Paula',
       telefone: '(11) 98888-1111',
       endereco: 'Rua das Flores, 120 - Centro',
       formaPagamento: 'Pix',
-      itens: cardapioItens,
+      itens: [
+        { produtoId: 'yakisoba-especial', nome: 'Yakisoba especial', preco: 39.9, quantidade: 1, observacao: 'sem cebola' },
+        { produtoId: 'refrigerante-lata', nome: 'Refrigerante lata', preco: 6.5, quantidade: 2, observacao: '' },
+      ],
       observacaoGeral: 'Entregar no portão azul.',
-      total: somaItens(cardapioItens),
       status: 'Novo',
+      minEntrada: 8,
     },
     {
-      id: 'exemplo-telefone',
+      id: 'exemplo-2',
       origem: 'Telefone',
       clienteNome: 'Carlos Mendes',
       telefone: '(11) 97777-2222',
       endereco: 'Av. Brasil, 45 - Jardim',
       formaPagamento: 'Dinheiro',
-      itens: telefoneItens,
+      itens: [
+        { produtoId: 'frango-xadrez', nome: 'Frango xadrez', preco: 34.9, quantidade: 1, observacao: 'bem passado' },
+        { produtoId: 'rolinho-primavera', nome: 'Rolinho primavera', preco: 18.9, quantidade: 1, observacao: '' },
+      ],
       observacaoGeral: 'Troco para R$ 100,00.',
-      total: somaItens(telefoneItens),
       status: 'Em preparo',
+      minEntrada: 20,
+      minInicio: 15,
     },
     {
-      id: 'exemplo-whatsapp',
+      id: 'exemplo-3',
       origem: 'WhatsApp',
       clienteNome: 'Juliana Souza',
       telefone: '(11) 96666-3333',
       endereco: 'Rua do Sol, 300 - Vila Nova',
-      formaPagamento: 'Cartão de crédito',
-      itens: whatsappItens,
+      formaPagamento: 'Cartão',
+      itens: [
+        { produtoId: 'temaki-salmao', nome: 'Temaki salmão', preco: 28.9, quantidade: 2, observacao: 'pouco wasabi' },
+        { produtoId: 'suco-natural', nome: 'Suco natural', preco: 9.9, quantidade: 1, observacao: 'laranja' },
+        { produtoId: 'harumaki-doce', nome: 'Harumaki doce', preco: 16.9, quantidade: 1, observacao: '' },
+      ],
       observacaoGeral: 'Cliente vai retirar no balcão.',
-      total: somaItens(whatsappItens),
       status: 'Pronto',
+      minEntrada: 35,
+      minInicio: 30,
+      minPronto: 12,
+    },
+    {
+      id: 'exemplo-4',
+      origem: 'Telefone',
+      clienteNome: 'Ana Paula',
+      telefone: '(11) 98888-1111',
+      endereco: 'Rua das Flores, 120 - Centro',
+      formaPagamento: 'Dinheiro',
+      itens: [
+        { produtoId: 'yakisoba-tradicional', nome: 'Yakisoba tradicional', preco: 32.9, quantidade: 2, observacao: '' },
+        { produtoId: 'refrigerante-lata', nome: 'Refrigerante lata', preco: 6.5, quantidade: 1, observacao: 'bem gelado' },
+      ],
+      observacaoGeral: '',
+      status: 'Entregue',
+      minEntrada: 120,
+      minInicio: 116,
+      minPronto: 100,
+      minConcluido: 85,
+    },
+    {
+      id: 'exemplo-5',
+      origem: 'Balcão',
+      clienteNome: 'Roberto Lima',
+      telefone: '(11) 95555-4444',
+      endereco: '',
+      formaPagamento: 'Cartão',
+      itens: [
+        { produtoId: 'yakisoba-especial', nome: 'Yakisoba especial', preco: 39.9, quantidade: 1, observacao: '' },
+        { produtoId: 'harumaki-doce', nome: 'Harumaki doce', preco: 16.9, quantidade: 2, observacao: '' },
+      ],
+      observacaoGeral: 'Retirada no balcão.',
+      status: 'Entregue',
+      minEntrada: 150,
+      minInicio: 145,
+      minPronto: 130,
+      minConcluido: 120,
+    },
+    {
+      id: 'exemplo-6',
+      origem: 'WhatsApp',
+      clienteNome: 'Roberto Lima',
+      telefone: '(11) 95555-4444',
+      endereco: 'Rua Verde, 88 - Centro',
+      formaPagamento: 'Na entrega',
+      itens: [
+        { produtoId: 'yakisoba-tradicional', nome: 'Yakisoba tradicional', preco: 32.9, quantidade: 1, observacao: '' },
+        { produtoId: 'suco-natural', nome: 'Suco natural', preco: 9.9, quantidade: 2, observacao: '' },
+      ],
+      observacaoGeral: 'Pagar na entrega.',
+      status: 'Entregue',
+      minEntrada: 200,
+      minInicio: 195,
+      minPronto: 180,
+      minConcluido: 170,
+    },
+    {
+      id: 'exemplo-7',
+      origem: 'Cardápio',
+      clienteNome: 'Fernanda Dias',
+      telefone: '(11) 94444-5555',
+      endereco: 'Av. Central, 500 - Jardim',
+      formaPagamento: 'Pix',
+      itens: [
+        { produtoId: 'temaki-salmao', nome: 'Temaki salmão', preco: 28.9, quantidade: 1, observacao: '' },
+      ],
+      observacaoGeral: 'Cliente desistiu.',
+      status: 'Cancelado',
+      minEntrada: 60,
     },
   ]
+}
+
+// Ids fixos garantem que os pedidos de exemplo nao dupliquem se o botao
+// for clicado varias vezes.
+const IDS_EXEMPLO = modelosExemplo().map((m) => m.id)
+
+function isoAtras(agora: number, minutos?: number): string | undefined {
+  if (minutos === undefined) return undefined
+  return new Date(agora - minutos * MIN).toISOString()
 }
 
 // Verifica se ja existe algum pedido de exemplo carregado.
@@ -157,14 +254,26 @@ export function carregarPedidosExemplo(): number {
   const agora = Date.now()
   let adicionados = 0
 
-  modelosExemplo().forEach((modelo, indice) => {
+  modelosExemplo().forEach((modelo) => {
     if (idsExistentes.has(modelo.id)) return
-    pedidos.push({
-      ...modelo,
+    const pedido: Pedido = {
+      id: modelo.id,
       numero: proximoNumero(),
-      // Escalona os horarios em minutos para parecerem chegadas reais.
-      criadoEm: new Date(agora - (IDS_EXEMPLO.length - indice) * 60000).toISOString(),
-    })
+      origem: modelo.origem,
+      clienteNome: modelo.clienteNome,
+      telefone: modelo.telefone,
+      endereco: modelo.endereco,
+      formaPagamento: modelo.formaPagamento,
+      itens: modelo.itens,
+      observacaoGeral: modelo.observacaoGeral,
+      total: somaItens(modelo.itens),
+      status: modelo.status,
+      criadoEm: new Date(agora - modelo.minEntrada * MIN).toISOString(),
+      startedAt: isoAtras(agora, modelo.minInicio),
+      readyAt: isoAtras(agora, modelo.minPronto),
+      completedAt: isoAtras(agora, modelo.minConcluido),
+    }
+    pedidos.push(pedido)
     adicionados++
   })
 

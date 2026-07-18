@@ -34,6 +34,33 @@ export function calcularTotal(itens: ItemPedido[]): number {
   return itens.reduce((soma, item) => soma + item.preco * item.quantidade, 0)
 }
 
+// Formata uma duracao (em minutos) como "8 min" ou "1h 25min".
+export function formatarDuracaoMin(minutos: number): string {
+  if (minutos < 0) return '-'
+  if (minutos < 60) return `${minutos} min`
+  const h = Math.floor(minutos / 60)
+  const m = minutos % 60
+  return m === 0 ? `${h}h` : `${h}h ${m}min`
+}
+
+// Tempo entre dois horarios ISO, em texto. Retorna '-' se faltar dado.
+export function tempoEntre(inicioIso?: string, fimIso?: string): string {
+  if (!inicioIso || !fimIso) return '-'
+  const ms = new Date(fimIso).getTime() - new Date(inicioIso).getTime()
+  if (isNaN(ms) || ms < 0) return '-'
+  return formatarDuracaoMin(Math.round(ms / 60000))
+}
+
+// Verifica se um horario ISO cai no mesmo dia (local) de uma referencia.
+export function ehMesmoDia(iso: string, referencia: Date): boolean {
+  const d = new Date(iso)
+  return (
+    d.getFullYear() === referencia.getFullYear() &&
+    d.getMonth() === referencia.getMonth() &&
+    d.getDate() === referencia.getDate()
+  )
+}
+
 // Monta uma mensagem de WhatsApp formatada (apenas demonstracao).
 // Nao envia nada. Serve para mostrar o conceito na apresentacao.
 export function montarMensagemWhatsApp(pedido: Pedido): string {

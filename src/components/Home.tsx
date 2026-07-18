@@ -40,6 +40,14 @@ export default function Home({ irPara, carregarExemplos }: Props) {
         </button>
       </div>
 
+      <div className="home-secao-dono">
+        <span className="home-secao-rotulo">Para o dono</span>
+        <button className="btn-grande btn-dono" onClick={() => irPara('admin')}>
+          <span className="btn-icone">📊</span>
+          Painel do Dono
+        </button>
+      </div>
+
       <div className="modo-apresentacao">
         <p className="modo-apresentacao-texto">
           Para apresentação, carregue pedidos de exemplo.
