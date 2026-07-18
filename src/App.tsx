@@ -12,10 +12,10 @@ export type View = 'home' | 'cardapio' | 'manual' | 'painel' | 'cozinha'
 
 const TITULOS: Record<View, string> = {
   home: 'Início',
-  cardapio: 'Cardápio',
-  manual: 'Pedido Manual',
-  painel: 'Painel de Pedidos',
-  cozinha: 'Cozinha / Impressão',
+  cardapio: 'Cardápio digital',
+  manual: 'Novo Pedido',
+  painel: 'Pedidos em andamento',
+  cozinha: 'Cozinha',
 }
 
 export default function App() {

@@ -22,21 +22,21 @@ export default function Home({ irPara, carregarExemplos }: Props) {
       </div>
 
       <div className="home-botoes">
-        <button className="btn-grande btn-primario" onClick={() => irPara('cardapio')}>
-          <span className="btn-icone">🍽️</span>
-          Abrir Cardápio
-        </button>
-        <button className="btn-grande" onClick={() => irPara('manual')}>
+        <button className="btn-grande btn-primario btn-destaque" onClick={() => irPara('manual')}>
           <span className="btn-icone">📝</span>
-          Pedido Manual
+          Novo Pedido
         </button>
         <button className="btn-grande" onClick={() => irPara('painel')}>
           <span className="btn-icone">📋</span>
-          Painel de Pedidos
+          Pedidos em andamento
         </button>
         <button className="btn-grande" onClick={() => irPara('cozinha')}>
-          <span className="btn-icone">🖨️</span>
-          Cozinha / Impressão
+          <span className="btn-icone">🍳</span>
+          Cozinha
+        </button>
+        <button className="btn-grande" onClick={() => irPara('cardapio')}>
+          <span className="btn-icone">🍽️</span>
+          Cardápio digital
         </button>
       </div>
 
@@ -50,8 +50,8 @@ export default function Home({ irPara, carregarExemplos }: Props) {
       </div>
 
       <p className="aviso-demo">
-        Demonstração. A integração real com impressora será validada após teste
-        no restaurante.
+        Essa é uma demonstração. O sistema pode ser ajustado conforme a rotina do
+        restaurante. A impressora será testada no próprio restaurante.
       </p>
     </div>
   )

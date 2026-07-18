@@ -16,11 +16,20 @@ interface LinhaCarrinho {
   observacao: string
 }
 
-// Origens validas para lancamento manual (o Cardapio ja tem tela propria).
+// De onde o pedido chegou (o Cardapio tem tela propria para o cliente).
 const ORIGENS_MANUAIS: OrigemPedido[] = ORIGENS.filter((o) => o !== 'Cardápio')
 
+const ICONE_ORIGEM: Record<string, string> = {
+  Telefone: '📞',
+  WhatsApp: '💬',
+  Balcão: '🧍',
+}
+
+// Tela de lancamento de pedido, em passos simples, para quem esta acostumada
+// a anotar no papel: 1) de onde veio  2) o que pediu  3) dados e salvar.
 export default function PedidoManual({ aoCriarPedido, imprimir }: Props) {
-  const [origem, setOrigem] = useState<OrigemPedido>('Telefone')
+  const [passo, setPasso] = useState<1 | 2 | 3>(1)
+  const [origem, setOrigem] = useState<OrigemPedido | null>(null)
   const [carrinho, setCarrinho] = useState<Record<string, LinhaCarrinho>>({})
   const [clienteNome, setClienteNome] = useState('')
   const [telefone, setTelefone] = useState('')
@@ -46,6 +55,7 @@ export default function PedidoManual({ aoCriarPedido, imprimir }: Props) {
   }, [carrinho])
 
   const total = calcularTotal(itens)
+  const quantidadeItens = itens.reduce((s, i) => s + i.quantidade, 0)
 
   function alterarQuantidade(produtoId: string, delta: number) {
     setCarrinho((atual) => {
@@ -62,18 +72,28 @@ export default function PedidoManual({ aoCriarPedido, imprimir }: Props) {
     })
   }
 
-  function salvar() {
+  function escolherOrigem(o: OrigemPedido) {
+    setOrigem(o)
+    setPasso(2)
+  }
+
+  function irParaDados() {
     setErro('')
     if (itens.length === 0) {
-      setErro('Adicione ao menos um item ao pedido.')
+      setErro('Escolha ao menos um item do cardápio.')
       return
     }
+    setPasso(3)
+  }
+
+  function salvar() {
+    setErro('')
     if (!clienteNome.trim()) {
-      setErro('Informe o nome do cliente.')
+      setErro('Escreva o nome do cliente.')
       return
     }
     const pedido = criarPedido({
-      origem,
+      origem: origem ?? 'Telefone',
       clienteNome: clienteNome.trim(),
       telefone: telefone.trim(),
       endereco: endereco.trim(),
@@ -87,7 +107,8 @@ export default function PedidoManual({ aoCriarPedido, imprimir }: Props) {
   }
 
   function novoPedido() {
-    setOrigem('Telefone')
+    setPasso(1)
+    setOrigem(null)
     setCarrinho({})
     setClienteNome('')
     setTelefone('')
@@ -106,7 +127,7 @@ export default function PedidoManual({ aoCriarPedido, imprimir }: Props) {
           <div className="confirmacao-check">✅</div>
           <h2>Pedido salvo!</h2>
           <p>
-            Pedido <strong>#{pedidoCriado.numero}</strong> registrado como{' '}
+            Pedido <strong>#{pedidoCriado.numero}</strong> — chegou por{' '}
             <strong>{pedidoCriado.origem}</strong>.
           </p>
 
@@ -122,7 +143,7 @@ export default function PedidoManual({ aoCriarPedido, imprimir }: Props) {
               🖨️ Imprimir comanda
             </button>
             <button className="btn-grande" onClick={novoPedido}>
-              Lançar novo pedido
+              Novo pedido
             </button>
           </div>
         </div>
@@ -130,168 +151,201 @@ export default function PedidoManual({ aoCriarPedido, imprimir }: Props) {
     )
   }
 
-  // --- Formulario --------------------------------------------------------
+  // --- Passos ------------------------------------------------------------
   return (
     <div className="tela">
-      <h2 className="tela-titulo">Pedido manual do atendente</h2>
-      <p className="nota-pequena">
-        Para pedidos que chegam por telefone, balcão ou WhatsApp escrito.
-      </p>
+      <div className="passos-indicador">Passo {passo} de 3</div>
 
-      <section className="formulario">
-        <label className="campo">
-          <span>Origem do pedido</span>
-          <select
-            value={origem}
-            onChange={(e) => setOrigem(e.target.value as OrigemPedido)}
-          >
+      {/* PASSO 1: de onde veio o pedido */}
+      {passo === 1 && (
+        <section className="passo">
+          <h2 className="passo-pergunta">De onde veio o pedido?</h2>
+          <div className="origem-botoes">
             {ORIGENS_MANUAIS.map((o) => (
-              <option key={o} value={o}>
+              <button
+                key={o}
+                className="btn-origem"
+                onClick={() => escolherOrigem(o)}
+              >
+                <span className="btn-origem-icone">{ICONE_ORIGEM[o]}</span>
                 {o}
-              </option>
+              </button>
             ))}
-          </select>
-        </label>
-      </section>
+          </div>
+        </section>
+      )}
 
-      <section className="categoria">
-        <h3 className="categoria-titulo">Produtos</h3>
-        {CATEGORIAS_ORDEM.map((categoria) => {
-          const produtos = PRODUTOS.filter((p) => p.categoria === categoria)
-          if (produtos.length === 0) return null
-          return (
-            <div key={categoria} className="categoria-manual">
-              <div className="categoria-subtitulo">{categoria}</div>
-              {produtos.map((produto) => {
-                const linha = carrinho[produto.id]
-                const qtd = linha?.quantidade ?? 0
-                return (
-                  <div className="produto" key={produto.id}>
-                    <div className="produto-info">
-                      <div className="produto-nome">{produto.nome}</div>
-                      <div className="produto-preco">
-                        {formatarMoeda(produto.preco)}
+      {/* PASSO 2: o que o cliente pediu */}
+      {passo === 2 && (
+        <section className="passo">
+          <h2 className="passo-pergunta">O que o cliente pediu?</h2>
+          <p className="nota-pequena">
+            Toque no + para somar. Pedido de {origem}.
+          </p>
+
+          {CATEGORIAS_ORDEM.map((categoria) => {
+            const produtos = PRODUTOS.filter((p) => p.categoria === categoria)
+            if (produtos.length === 0) return null
+            return (
+              <div key={categoria} className="categoria-manual">
+                <div className="categoria-subtitulo">{categoria}</div>
+                {produtos.map((produto) => {
+                  const linha = carrinho[produto.id]
+                  const qtd = linha?.quantidade ?? 0
+                  return (
+                    <div className="produto" key={produto.id}>
+                      <div className="produto-info">
+                        <div className="produto-nome">{produto.nome}</div>
+                        <div className="produto-preco">
+                          {formatarMoeda(produto.preco)}
+                        </div>
+                      </div>
+                      <div className="produto-controles">
+                        <div className="stepper">
+                          <button
+                            type="button"
+                            aria-label="Tirar um"
+                            onClick={() => alterarQuantidade(produto.id, -1)}
+                            disabled={qtd === 0}
+                          >
+                            −
+                          </button>
+                          <span className="stepper-valor">{qtd}</span>
+                          <button
+                            type="button"
+                            aria-label="Somar um"
+                            onClick={() => alterarQuantidade(produto.id, 1)}
+                          >
+                            +
+                          </button>
+                        </div>
+                        {qtd > 0 && (
+                          <input
+                            className="input-obs"
+                            type="text"
+                            placeholder="Alguma observação? Ex: sem cebola"
+                            value={linha?.observacao ?? ''}
+                            onChange={(e) =>
+                              alterarObservacao(produto.id, e.target.value)
+                            }
+                          />
+                        )}
                       </div>
                     </div>
-                    <div className="produto-controles">
-                      <div className="stepper">
-                        <button
-                          type="button"
-                          aria-label="Diminuir"
-                          onClick={() => alterarQuantidade(produto.id, -1)}
-                          disabled={qtd === 0}
-                        >
-                          −
-                        </button>
-                        <span className="stepper-valor">{qtd}</span>
-                        <button
-                          type="button"
-                          aria-label="Aumentar"
-                          onClick={() => alterarQuantidade(produto.id, 1)}
-                        >
-                          +
-                        </button>
-                      </div>
-                      {qtd > 0 && (
-                        <input
-                          className="input-obs"
-                          type="text"
-                          placeholder="Observação do item"
-                          value={linha?.observacao ?? ''}
-                          onChange={(e) =>
-                            alterarObservacao(produto.id, e.target.value)
-                          }
-                        />
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
+                  )
+                })}
+              </div>
+            )
+          })}
+
+          {erro && <div className="erro">{erro}</div>}
+
+          <div className="barra-passo">
+            <button className="btn-secundario" onClick={() => setPasso(1)}>
+              ← Voltar
+            </button>
+            <div className="barra-passo-total">
+              {quantidadeItens > 0 && (
+                <>
+                  {quantidadeItens} {quantidadeItens === 1 ? 'item' : 'itens'} ·{' '}
+                  <strong>{formatarMoeda(total)}</strong>
+                </>
+              )}
             </div>
-          )
-        })}
-      </section>
+            <button className="btn-primario btn-continuar" onClick={irParaDados}>
+              Continuar →
+            </button>
+          </div>
+        </section>
+      )}
 
-      <section className="carrinho">
-        <h3 className="categoria-titulo">Resumo</h3>
-        {itens.length === 0 ? (
-          <p className="nota-pequena">Nenhum item adicionado ainda.</p>
-        ) : (
-          <ul className="carrinho-itens">
-            {itens.map((item) => (
-              <li key={item.produtoId}>
-                <span>
-                  {item.quantidade}x {item.nome}
-                </span>
-                <span>{formatarMoeda(item.preco * item.quantidade)}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-        <div className="carrinho-total">
-          <span>Total</span>
-          <span>{formatarMoeda(total)}</span>
-        </div>
-      </section>
+      {/* PASSO 3: dados do cliente e salvar */}
+      {passo === 3 && (
+        <section className="passo">
+          <h2 className="passo-pergunta">Dados do cliente</h2>
 
-      <section className="formulario">
-        <h3 className="categoria-titulo">Dados do cliente</h3>
-        <label className="campo">
-          <span>Nome do cliente *</span>
-          <input
-            type="text"
-            value={clienteNome}
-            onChange={(e) => setClienteNome(e.target.value)}
-            placeholder="Ex: João Souza"
-          />
-        </label>
-        <label className="campo">
-          <span>Telefone</span>
-          <input
-            type="tel"
-            value={telefone}
-            onChange={(e) => setTelefone(e.target.value)}
-            placeholder="(00) 00000-0000"
-          />
-        </label>
-        <label className="campo">
-          <span>Endereço</span>
-          <input
-            type="text"
-            value={endereco}
-            onChange={(e) => setEndereco(e.target.value)}
-            placeholder="Rua, número, bairro"
-          />
-        </label>
-        <label className="campo">
-          <span>Forma de pagamento</span>
-          <select
-            value={formaPagamento}
-            onChange={(e) => setFormaPagamento(e.target.value as FormaPagamento)}
-          >
-            {FORMAS_PAGAMENTO.map((f) => (
-              <option key={f} value={f}>
-                {f}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="campo">
-          <span>Observação geral</span>
-          <textarea
-            value={observacaoGeral}
-            onChange={(e) => setObservacaoGeral(e.target.value)}
-            placeholder="Ex: cliente vai retirar no balcão"
-            rows={2}
-          />
-        </label>
-      </section>
+          <div className="resumo-simples">
+            <div className="resumo-simples-titulo">
+              Pedido de {origem} · {formatarMoeda(total)}
+            </div>
+            <ul className="carrinho-itens">
+              {itens.map((item) => (
+                <li key={item.produtoId}>
+                  <span>
+                    {item.quantidade}x {item.nome}
+                  </span>
+                  <span>{formatarMoeda(item.preco * item.quantidade)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-      {erro && <div className="erro">{erro}</div>}
+          <div className="formulario">
+            <label className="campo">
+              <span>Nome do cliente *</span>
+              <input
+                type="text"
+                value={clienteNome}
+                onChange={(e) => setClienteNome(e.target.value)}
+                placeholder="Ex: João Souza"
+              />
+            </label>
+            <label className="campo">
+              <span>Telefone</span>
+              <input
+                type="tel"
+                value={telefone}
+                onChange={(e) => setTelefone(e.target.value)}
+                placeholder="(00) 00000-0000"
+              />
+            </label>
+            <label className="campo">
+              <span>Endereço</span>
+              <input
+                type="text"
+                value={endereco}
+                onChange={(e) => setEndereco(e.target.value)}
+                placeholder="Rua, número, bairro"
+              />
+            </label>
+            <label className="campo">
+              <span>Forma de pagamento</span>
+              <select
+                value={formaPagamento}
+                onChange={(e) =>
+                  setFormaPagamento(e.target.value as FormaPagamento)
+                }
+              >
+                {FORMAS_PAGAMENTO.map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="campo">
+              <span>Observação do pedido</span>
+              <textarea
+                value={observacaoGeral}
+                onChange={(e) => setObservacaoGeral(e.target.value)}
+                placeholder="Ex: cliente vai retirar no balcão"
+                rows={2}
+              />
+            </label>
+          </div>
 
-      <button className="btn-grande btn-primario btn-enviar" onClick={salvar}>
-        Salvar e gerar comanda
-      </button>
+          {erro && <div className="erro">{erro}</div>}
+
+          <div className="barra-passo">
+            <button className="btn-secundario" onClick={() => setPasso(2)}>
+              ← Voltar
+            </button>
+            <button className="btn-primario btn-continuar" onClick={salvar}>
+              Salvar pedido
+            </button>
+          </div>
+        </section>
+      )}
     </div>
   )
 }

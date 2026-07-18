@@ -20,15 +20,15 @@ export default function Cozinha({ pedidos, verComanda, imprimir }: Props) {
 
   return (
     <div className="tela">
-      <h2 className="tela-titulo">Cozinha / Impressão</h2>
+      <h2 className="tela-titulo">Cozinha</h2>
       <p className="nota-pequena">
-        Pedidos em produção (Novo, Em preparo e Pronto).
+        Pedidos para preparar. Toque em Imprimir para gerar a comanda.
       </p>
 
       {daCozinha.length === 0 ? (
-        <p className="vazio">Nenhum pedido em produção no momento.</p>
+        <p className="vazio">Nenhum pedido na cozinha no momento.</p>
       ) : (
-        <div className="lista-cozinha">
+        <div className="lista-cozinha mural-comandas">
           {daCozinha.map((pedido) => (
             <div className="card-cozinha" key={pedido.id}>
               <div className="card-pedido-topo">

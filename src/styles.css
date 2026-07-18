@@ -176,6 +176,17 @@ button {
   border-color: var(--cor-primaria);
 }
 
+/* Botao principal da tela inicial (Novo Pedido): maior e com destaque. */
+.btn-destaque {
+  padding: 26px 20px;
+  font-size: 1.4rem;
+  box-shadow: 0 4px 14px rgba(185, 28, 28, 0.3);
+}
+
+.btn-destaque .btn-icone {
+  font-size: 1.9rem;
+}
+
 .btn-primario:active {
   background: var(--cor-primaria-escura);
 }
@@ -245,6 +256,109 @@ button {
 
 .btn-apresentacao:active {
   background: #f3f4f6;
+}
+
+/* ---------- Passos (Novo Pedido) ---------- */
+
+.passos-indicador {
+  display: inline-block;
+  align-self: flex-start;
+  background: var(--cor-borda);
+  color: var(--cor-texto-suave);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+.passo {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.passo-pergunta {
+  font-size: 1.4rem;
+}
+
+/* Botoes grandes de origem (Telefone / WhatsApp / Balcao) */
+.origem-botoes {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.btn-origem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 22px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border: 2px solid var(--cor-borda-forte);
+  border-radius: var(--raio);
+  background: var(--cor-card);
+  color: var(--cor-texto);
+  box-shadow: var(--sombra);
+}
+
+.btn-origem:active {
+  background: #f3f4f6;
+  transform: scale(0.99);
+}
+
+.btn-origem-icone {
+  font-size: 2rem;
+}
+
+/* Barra inferior de navegacao entre passos */
+.barra-passo {
+  position: sticky;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--cor-fundo);
+  padding: 10px 0;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.barra-passo .btn-secundario {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.barra-passo-total {
+  flex: 1;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--cor-texto-suave);
+}
+
+.btn-continuar {
+  flex: 0 0 auto;
+  padding: 14px 22px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: 10px;
+  border: 2px solid var(--cor-primaria);
+}
+
+/* Resumo compacto no passo de dados */
+.resumo-simples {
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 12px 14px;
+  box-shadow: var(--sombra);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resumo-simples-titulo {
+  font-weight: 700;
+  color: var(--cor-primaria);
 }
 
 /* ---------- Categorias e produtos ---------- */
@@ -643,6 +757,23 @@ textarea {
 }
 
 /* ---------- Cozinha ---------- */
+
+/* Mural de comandas: cartoes com cara de papel "pendurado" */
+.mural-comandas .card-cozinha {
+  background: #fffdf5;
+  border: 1px solid #e7e1c8;
+  border-top: 4px solid var(--cor-primaria);
+  position: relative;
+}
+
+.mural-comandas .card-cozinha::before {
+  content: '📌';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.1rem;
+}
 
 .card-cozinha-meta {
   color: var(--cor-texto-suave);

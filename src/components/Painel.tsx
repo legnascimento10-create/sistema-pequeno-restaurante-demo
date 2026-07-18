@@ -44,7 +44,7 @@ export default function Painel({
   return (
     <div className="tela">
       <div className="tela-header-linha">
-        <h2 className="tela-titulo">Painel de pedidos</h2>
+        <h2 className="tela-titulo">Pedidos em andamento</h2>
         {pedidos.length > 0 && (
           <button className="btn-perigo btn-pequeno" onClick={limpar}>
             Limpar pedidos da demo
@@ -63,7 +63,7 @@ export default function Painel({
 
       {ordenados.length === 0 ? (
         <p className="vazio">
-          Nenhum pedido ainda. Crie um pelo Cardápio ou pelo Pedido Manual.
+          Nenhum pedido ainda. Toque em <strong>Novo Pedido</strong> para começar.
         </p>
       ) : (
         <div className="lista-pedidos">
