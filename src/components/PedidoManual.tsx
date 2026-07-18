@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { PRODUTOS, CATEGORIAS_ORDEM } from '../data/products'
-import { FORMAS_PAGAMENTO, ORIGENS } from '../types'
+import { ORIGENS } from '../types'
 import type { FormaPagamento, ItemPedido, OrigemPedido, Pedido } from '../types'
 import { criarPedido } from '../utils/storage'
 import { calcularTotal, formatarMoeda } from '../utils/format'
@@ -18,6 +18,14 @@ interface LinhaCarrinho {
 
 // De onde o pedido chegou (o Cardapio tem tela propria para o cliente).
 const ORIGENS_MANUAIS: OrigemPedido[] = ORIGENS.filter((o) => o !== 'Cardápio')
+
+// Formas de pagamento em botoes grandes, com linguagem simples.
+const FORMAS_PAGAMENTO_BOTOES: FormaPagamento[] = [
+  'Dinheiro',
+  'Pix',
+  'Cartão',
+  'Na entrega',
+]
 
 const ICONE_ORIGEM: Record<string, string> = {
   Telefone: '📞',
@@ -308,21 +316,23 @@ export default function PedidoManual({ aoCriarPedido, imprimir }: Props) {
                 placeholder="Rua, número, bairro"
               />
             </label>
-            <label className="campo">
+            <div className="campo">
               <span>Forma de pagamento</span>
-              <select
-                value={formaPagamento}
-                onChange={(e) =>
-                  setFormaPagamento(e.target.value as FormaPagamento)
-                }
-              >
-                {FORMAS_PAGAMENTO.map((f) => (
-                  <option key={f} value={f}>
+              <div className="pagamento-botoes">
+                {FORMAS_PAGAMENTO_BOTOES.map((f) => (
+                  <button
+                    key={f}
+                    type="button"
+                    className={
+                      'btn-pagamento' + (formaPagamento === f ? ' ativo' : '')
+                    }
+                    onClick={() => setFormaPagamento(f)}
+                  >
                     {f}
-                  </option>
+                  </button>
                 ))}
-              </select>
-            </label>
+              </div>
+            </div>
             <label className="campo">
               <span>Observação do pedido</span>
               <textarea

@@ -344,6 +344,33 @@ button {
   border: 2px solid var(--cor-primaria);
 }
 
+/* Botoes grandes de forma de pagamento */
+.pagamento-botoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.btn-pagamento {
+  padding: 16px 12px;
+  border: 2px solid var(--cor-borda-forte);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--cor-texto);
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.btn-pagamento:active {
+  transform: scale(0.99);
+}
+
+.btn-pagamento.ativo {
+  border-color: var(--cor-primaria);
+  background: var(--cor-primaria);
+  color: #fff;
+}
+
 /* Resumo compacto no passo de dados */
 .resumo-simples {
   background: var(--cor-card);

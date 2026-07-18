@@ -24,6 +24,8 @@ export type StatusPedido =
 export type FormaPagamento =
   | 'Dinheiro'
   | 'Pix'
+  | 'Cartão'
+  | 'Na entrega'
   | 'Cartão de débito'
   | 'Cartão de crédito'
   | 'A definir'
